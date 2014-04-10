@@ -22,6 +22,9 @@ class FeedManager(object):
         feeds = (Feed(url) for url in url_list)
         self.named_feeds = {feed.title : feed for feed in feeds}
 
+    def __format(self, source, title):
+        return  ': '.join([''.join(['[', source, ']']), ''.join(['"', title, '"'])])
+
     def get_latest(self, limit):
         entries_by_source = ((source, feed.get_latest(limit))
                 for source, feed in self.named_feeds.iteritems())
@@ -30,7 +33,7 @@ class FeedManager(object):
                 ((source, entry) for entry in entries)
                         for source, entries in entries_by_source)
 
-        return (': '.join([''.join(['[', source, ']']), ''.join(['"', entry.title, '"'])])
+        return (self.__format(source, entry.title)
                 for source, entry in heapq.nlargest(limit, all_sourced_entries,
                         key=lambda t: t[1].published_parsed))
 
