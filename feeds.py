@@ -18,11 +18,11 @@ class Feed(object):
 class FeedManager(object):
     def __init__(self, url_list):
         feeds = (Feed(url) for url in url_list)
-        self.feeds_dict = {feed.title : feed for feed in feeds}
+        self.named_feeds = {feed.title : feed for feed in feeds}
 
     def get_latest(self, limit):
         entries_by_source = ((source, feed.get_latest(limit))
-                for source, feed in self.feeds_dict.iteritems())
+                for source, feed in self.named_feeds.iteritems())
 
         all_sourced_entries = itertools.chain.from_iterable(
                 ((source, entry) for entry in entries)
