@@ -1,8 +1,10 @@
 import heapq
 import itertools
+import sys
 
 
 import feedparser
+
 
 class Feed(object):
     def __init__(self, url):
@@ -28,16 +30,20 @@ class FeedManager(object):
                 ((source, entry) for entry in entries)
                         for source, entries in entries_by_source)
 
-        return (': '.join([source, ''.join(['"', entry.title, '"'])])
+        return (': '.join([''.join(['[', source, ']']), ''.join(['"', entry.title, '"'])])
                 for source, entry in heapq.nlargest(limit, all_sourced_entries,
                         key=lambda t: t[1].published_parsed))
 
 
 if __name__ == "__main__":
+    limit = int(sys.argv[1])
+
     rss_list = [
-        'http://www.gamespot.com/feeds/news/'
+        'http://www.gamespot.com/feeds/news/',
+        'http://www.nintendolife.com/feeds/news',
+        'http://www.escapistmagazine.com/rss/news/0.xml'
     ]
 
     manager = FeedManager(rss_list)
 
-    print(list(manager.get_latest(5)))
+    print('   --   '.join(manager.get_latest(limit)))
