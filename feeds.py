@@ -10,14 +10,14 @@ import feedparser
 
 
 class Feed(object):
-    blacklist_words = ['exp:', 'joystiq', 'review', 'ign', 'podcast', 'episode']
+    blacklist_words = ['exp:', 'joystiq', 'review', 'ign', 'podcast', 'episode', 'watch']
 
     def __init__(self, url):
         self.__url = url
         self.title = feedparser.parse(self.__url).feed.title
 
     def get_latest(self, limit):
-        entries = filter(lambda e: not any(word in e.title for word in Feed.blacklist_words),
+        entries = filter(lambda e: not any(word in e.title.lower() for word in Feed.blacklist_words),
                 feedparser.parse(self.__url).entries)
         return heapq.nlargest(limit, entries,
                 key=lambda entry: entry.published_parsed)
