@@ -1,7 +1,9 @@
 import heapq
 import HTMLParser
 import itertools
+import os
 import sys
+import time
 
 
 import feedparser
@@ -42,20 +44,36 @@ class FeedManager(object):
             return self.__h.unescape(title)
 
     def display_latest(self, limit):
-        print('   --   '.join(self.__format(source, entry.title, False)
-                for (source, entry) in self.get_latest(limit)))
+        return '   --   '.join(self.__format(source, entry.title, False)
+                for (source, entry) in self.get_latest(limit))
+
+
+class FileManager(object):
+    def __init__(self, filename, feed_manager, limit=25, delay=120):
+        self.filename = filename
+        self.feed_manager = feed_manager
+        self.limit = limit
+        self.delay = delay
+
+    def work(self):
+        while True:
+            latest_news = self.feed_manager.display_latest(self.limit) + os.linesep
+
+            with open(self.filename, 'w') as f:
+                f.write(latest_news)
+
+            time.sleep(self.delay)
 
 
 if __name__ == "__main__":
-    limit = int(sys.argv[1])
 
     rss_list = [
-        'http://www.gamespot.com/feeds/news/',
+        #'http://www.gamespot.com/feeds/news/',
         'http://www.escapistmagazine.com/rss/news/0.xml',
         'http://www.gamesradar.com/all-platforms/news/rss/',
         'http://www.joystiq.com/rss.xml'
     ]
 
-    FeedManager(rss_list).display_latest(limit)
-
+    fileManager = FileManager('the_news.txt', FeedManager(rss_list))
+    fileManager.work()
 
