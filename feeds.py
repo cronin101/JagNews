@@ -10,12 +10,15 @@ import feedparser
 
 
 class Feed(object):
+    blacklist_words = set(['exp:', 'joystiq', 'review', 'ign', 'podcast', 'episode'])
+
     def __init__(self, url):
         self.__url = url
         self.title = feedparser.parse(self.__url).feed.title
 
     def get_latest(self, limit):
-        entries = feedparser.parse(self.__url).entries
+        entries = filter(lambda e: not any(word in e.title for word in Feed.blacklist_words),
+                feedparser.parse(self.__url).entries)
         return heapq.nlargest(limit, entries,
                 key=lambda entry: entry.published_parsed)
 
@@ -60,7 +63,7 @@ class FileManager(object):
             latest_news = self.feed_manager.display_latest(self.limit) + os.linesep
 
             with open(self.filename, 'w') as f:
-                f.write(latest_news)
+                f.write(latest_news.encode('utf8'))
 
             time.sleep(self.delay)
 
@@ -69,9 +72,10 @@ if __name__ == "__main__":
 
     rss_list = [
         #'http://www.gamespot.com/feeds/news/',
-        'http://www.escapistmagazine.com/rss/news/0.xml',
+        #'http://www.escapistmagazine.com/rss/news/0.xml',
         'http://www.gamesradar.com/all-platforms/news/rss/',
-        'http://www.joystiq.com/rss.xml'
+        'http://www.joystiq.com/rss.xml',
+        'http://feeds.ign.com/ign/news?format=xml'
     ]
 
     fileManager = FileManager('the_news.txt', FeedManager(rss_list))
