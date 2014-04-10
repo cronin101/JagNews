@@ -10,7 +10,7 @@ import feedparser
 
 
 class Feed(object):
-    blacklist_words = set(['exp:', 'joystiq', 'review', 'ign', 'podcast', 'episode'])
+    blacklist_words = ['exp:', 'joystiq', 'review', 'ign', 'podcast', 'episode']
 
     def __init__(self, url):
         self.__url = url
