@@ -22,9 +22,6 @@ class FeedManager(object):
         feeds = (Feed(url) for url in url_list)
         self.named_feeds = {feed.title : feed for feed in feeds}
 
-    def __format(self, source, title):
-        return  ': '.join([''.join(['[', source, ']']), ''.join(['"', title, '"'])])
-
     def get_latest(self, limit):
         entries_by_source = ((source, feed.get_latest(limit))
                 for source, feed in self.named_feeds.iteritems())
@@ -33,9 +30,15 @@ class FeedManager(object):
                 ((source, entry) for entry in entries)
                         for source, entries in entries_by_source)
 
-        return (self.__format(source, entry.title)
-                for source, entry in heapq.nlargest(limit, all_sourced_entries,
-                        key=lambda t: t[1].published_parsed))
+        return heapq.nlargest(limit, all_sourced_entries,
+                key=lambda t: t[1].published_parsed)
+
+    def __format(self, source, title):
+        return  ': '.join([''.join(['[', source, ']']), ''.join(['"', title, '"'])])
+
+    def display_latest(self, limit):
+        print('   --   '.join(self.__format(source, entry.title)
+                for (source, entry) in self.get_latest(limit)))
 
 
 if __name__ == "__main__":
@@ -47,6 +50,6 @@ if __name__ == "__main__":
         'http://www.escapistmagazine.com/rss/news/0.xml'
     ]
 
-    manager = FeedManager(rss_list)
+    FeedManager(rss_list).display_latest(5)
 
-    print('   --   '.join(manager.get_latest(limit)))
+
