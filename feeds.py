@@ -1,4 +1,5 @@
 import heapq
+import HTMLParser
 import itertools
 import sys
 
@@ -20,6 +21,7 @@ class Feed(object):
 class FeedManager(object):
     def __init__(self, url_list):
         feeds = (Feed(url) for url in url_list)
+        self.__h = HTMLParser.HTMLParser()
         self.named_feeds = {feed.title : feed for feed in feeds}
 
     def get_latest(self, limit):
@@ -33,11 +35,14 @@ class FeedManager(object):
         return heapq.nlargest(limit, all_sourced_entries,
                 key=lambda t: t[1].published_parsed)
 
-    def __format(self, source, title):
-        return  ': '.join([''.join(['[', source, ']']), ''.join(['"', title, '"'])])
+    def __format(self, source, title, show_source):
+        if show_source:
+            return  ': '.join([''.join(['[', source, ']']), ''.join(['"', title, '"'])])
+        else:
+            return self.__h.unescape(title)
 
     def display_latest(self, limit):
-        print('   --   '.join(self.__format(source, entry.title)
+        print('   --   '.join(self.__format(source, entry.title, False)
                 for (source, entry) in self.get_latest(limit)))
 
 
@@ -46,10 +51,11 @@ if __name__ == "__main__":
 
     rss_list = [
         'http://www.gamespot.com/feeds/news/',
-        'http://www.nintendolife.com/feeds/news',
-        'http://www.escapistmagazine.com/rss/news/0.xml'
+        'http://www.escapistmagazine.com/rss/news/0.xml',
+        'http://www.gamesradar.com/all-platforms/news/rss/',
+        'http://www.joystiq.com/rss.xml'
     ]
 
-    FeedManager(rss_list).display_latest(5)
+    FeedManager(rss_list).display_latest(limit)
 
 
